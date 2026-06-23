@@ -13,7 +13,7 @@ concurrency:
   group: 'pages'
   cancel-in-progress: true
 
-jobs:
+jobs:node
   deploy:
     environment:
       name: github-pages
