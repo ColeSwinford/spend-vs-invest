@@ -5,7 +5,6 @@ export default function App() {
   const [numericValue, setNumericValue] = useState<number>(0);
   
   const ANNUAL_RETURN_RATE = 0.07;
-  const MAX_YEAR = 40;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawString = e.target.value.replace(/\D/g, '');
