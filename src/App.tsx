@@ -5,6 +5,7 @@ export default function App() {
   const [numericValue, setNumericValue] = useState<number>(0);
   
   const ANNUAL_RETURN_RATE = 0.07;
+  const MAX_YEAR = 40;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawString = e.target.value.replace(/\D/g, '');
@@ -20,8 +21,22 @@ export default function App() {
     setDisplayValue(number.toLocaleString('en-US'));
   };
 
-  const invested10 = numericValue === 0 ? 0 : numericValue * Math.pow(1 + ANNUAL_RETURN_RATE, 10);
   const invested20 = numericValue === 0 ? 0 : numericValue * Math.pow(1 + ANNUAL_RETURN_RATE, 20);
+  const invested40 = numericValue === 0 ? 0 : numericValue * Math.pow(1 + ANNUAL_RETURN_RATE, 40);
+
+  // Generate data points for decades, scaled against the 40-year maximum
+  const chartData = [0, 10, 20, 30, 40].map((year) => {
+    const val = numericValue === 0 ? 0 : numericValue * Math.pow(1 + ANNUAL_RETURN_RATE, year);
+    const heightPercent = numericValue === 0 ? 0 : (val / invested40) * 100;
+    return { year, val, heightPercent };
+  });
+
+  const formatCompact = (val: number) => {
+    if (val === 0) return '0';
+    if (val >= 1000000) return '$' + (val / 1000000).toFixed(1) + 'M';
+    if (val >= 1000) return '$' + (val / 1000).toFixed(1) + 'k';
+    return '$' + Math.round(val).toString();
+  };
 
   return (
     <main style={{ 
@@ -56,7 +71,6 @@ export default function App() {
         
         {/* Split Results Section */}
         <div style={{ display: 'flex', gap: '12px', marginBottom: '32px' }}>
-          {/* 10 Year Box */}
           <div style={{ 
             flex: 1,
             padding: '24px 16px', 
@@ -66,14 +80,13 @@ export default function App() {
             textAlign: 'center'
           }}>
             <div style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px', fontWeight: 600 }}>
-              10 Years
+              20 Years
             </div>
             <div style={{ fontSize: '28px', fontWeight: 600, letterSpacing: '-0.5px' }}>
-              ${invested10.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+              ${invested20.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
             </div>
           </div>
 
-          {/* 20 Year Box */}
           <div style={{ 
             flex: 1,
             padding: '24px 16px', 
@@ -83,12 +96,54 @@ export default function App() {
             textAlign: 'center'
           }}>
             <div style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'rgba(255, 255, 255, 0.9)', marginBottom: '8px', fontWeight: 600 }}>
-              20 Years
+              40 Years
             </div>
             <div style={{ fontSize: '28px', fontWeight: 600, letterSpacing: '-0.5px' }}>
-              ${invested20.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+              ${invested40.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
             </div>
           </div>
+        </div>
+
+        {/* Visual CSS Gradient Chart */}
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'flex-end', 
+          justifyContent: 'space-between', 
+          height: '160px', 
+          marginBottom: '40px',
+          padding: '0 8px'
+        }}>
+          {chartData.map((data) => (
+            <div key={data.year} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '48px', height: '100%', justifyContent: 'flex-end' }}>
+              {/* Value floating above the bar */}
+              <div style={{ 
+                fontSize: '11px', 
+                color: 'rgba(255, 255, 255, 0.8)', 
+                marginBottom: '8px', 
+                opacity: numericValue > 0 ? 1 : 0, 
+                transition: 'opacity 0.2s',
+                fontWeight: 500
+              }}>
+                {formatCompact(data.val)}
+              </div>
+              
+              {/* The Gradient Bar */}
+              <div style={{
+                width: '100%',
+                height: `${data.heightPercent}%`,
+                minHeight: numericValue === 0 ? '4px' : '8px', // Slightly larger min-height so year 0 is visible when compounding gets massive
+                background: 'linear-gradient(to top, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.85))',
+                borderRadius: '6px',
+                marginBottom: '8px',
+                transition: 'height 0.4s cubic-bezier(0.4, 0, 0.2, 1)' 
+              }} />
+              
+              {/* X-Axis Label */}
+              <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.5)', fontWeight: 600, letterSpacing: '0.5px' }}>
+                {data.year === 0 ? 'NOW' : `${data.year}Y`}
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Input Section */}

@@ -19,12 +19,6 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    
-    # This explicitly tells the runner to execute commands in your nested folder
-    defaults:
-      run:
-        working-directory: ./spend-vs-invest
-        
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,8 +28,6 @@ jobs:
         with:
           node-version: 24
           cache: 'npm'
-          # Point the npm cache directly to your nested lockfile
-          cache-dependency-path: './spend-vs-invest/package-lock.json' 
 
       - name: Install dependencies
         run: npm ci
@@ -49,8 +41,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Point the deployment specifically to the nested dist output
-          path: './spend-vs-invest/dist'
+          path: './dist'
 
       - name: Deploy to GitHub Pages
         id: deployment
